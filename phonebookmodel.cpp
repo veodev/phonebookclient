@@ -93,6 +93,7 @@ bool PhoneBookModel::setData(const QModelIndex& index, const QVariant& value, in
 
 bool PhoneBookModel::insertRows(int position, int count, const QModelIndex& parent)
 {
+    Q_UNUSED(parent)
     beginInsertRows(QModelIndex(), position, position + count - 1);
     for (int i = position; i < position + count; ++i) {
         _data.insert(_data.begin() + i, Item());
