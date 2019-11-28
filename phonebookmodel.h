@@ -22,7 +22,7 @@ public:
     void editContact(QModelIndex& index, const QString& firstName, const QString& secondName, const QString& patronym, const QString& sex, const QString& phone);
 
     void resetModel();
-    void updateModelData(const QMap<int, Item>& data);
+    void updateModelData(const QList<Item>& data);
 
 private:
     QList<Item> _data;

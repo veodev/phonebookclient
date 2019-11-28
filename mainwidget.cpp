@@ -122,7 +122,7 @@ void MainWidget::readMessageFromBuffer()
                     _bufferItem.reset();
                     break;
                 case Headers::EndSingleContact:
-                    _contacts.insert(_itemIndex, _bufferItem);
+                    _contacts.push_back(_bufferItem);
                     ++_itemIndex;
                     break;
                 case Headers::SecondName: {
@@ -208,7 +208,7 @@ void MainWidget::modelDataChanged(const QModelIndex& topLeft, const QModelIndex&
         item.patronym = _model->data(index, PatronymRole).toString();
         item.sex = _model->data(index, SexRole).toString();
         item.phone = _model->data(index, PhoneRole).toString();
-        _contacts.insert(i, item);
+        _contacts.push_back(item);
     }
     updateServerData();
 }

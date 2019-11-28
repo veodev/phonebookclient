@@ -48,7 +48,7 @@ private:
     QModelIndex _currentModelIndex;
     DialogWidget* _dialogWidget;
     QByteArray _messagesBuffer;
-    QMap<int, Item> _contacts;
+    QList<Item> _contacts;
     Item _bufferItem;
     int _itemIndex;
 };

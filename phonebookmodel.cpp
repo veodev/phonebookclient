@@ -172,7 +172,7 @@ void PhoneBookModel::resetModel()
     endResetModel();
 }
 
-void PhoneBookModel::updateModelData(const QMap<int, Item>& data)
+void PhoneBookModel::updateModelData(const QList<Item>& data)
 {
     resetModel();
     for (const auto& item : data) {
