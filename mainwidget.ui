@@ -53,6 +53,9 @@
    </item>
    <item>
     <widget class="QTableView" name="tableView">
+     <property name="selectionBehavior">
+      <enum>QAbstractItemView::SelectRows</enum>
+     </property>
      <attribute name="horizontalHeaderMinimumSectionSize">
       <number>50</number>
      </attribute>
