@@ -48,23 +48,6 @@ private:
     QModelIndex _currentModelIndex;
     DialogWidget* _dialogWidget;
     QByteArray _messagesBuffer;
-    //    struct Item
-    //    {
-    //        QString secondName;
-    //        QString firstName;
-    //        QString patronym;
-    //        QString sex;
-    //        QString phone;
-    //        void reset()
-    //        {
-    //            secondName.clear();
-    //            firstName.clear();
-    //            patronym.clear();
-    //            sex.clear();
-    //            phone.clear();
-    //        }
-    //    };
-
     QMap<int, Item> _contacts;
     Item _bufferItem;
     int _itemIndex;

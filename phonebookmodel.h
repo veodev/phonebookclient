@@ -4,23 +4,6 @@
 #include <QAbstractListModel>
 #include <enums.h>
 
-// struct Item
-//{
-//    Item()
-//        : firstName("")
-//        , secondName("")
-//        , patronym("")
-//        , sex("")
-//        , phone("")
-//    {
-//    }
-//    QString firstName;
-//    QString secondName;
-//    QString patronym;
-//    QString sex;
-//    QString phone;
-//};
-
 class PhoneBookModel : public QAbstractListModel
 {
     Q_OBJECT
