@@ -5,6 +5,7 @@ DialogWidget::DialogWidget(QWidget* parent)
     : QWidget(parent)
     , ui(new Ui::DialogWidget)
     , _currentMode(DyalogWidgetModes::AddMode)
+    , _parentWidget(parent)
 {
     ui->setupUi(this);
     hide();
@@ -90,6 +91,15 @@ void DialogWidget::setSex(QString text)
 void DialogWidget::setPhone(QString text)
 {
     ui->phoneLineEdit->setText(text);
+}
+
+void DialogWidget::popup()
+{
+    QSize parentSize = _parentWidget->size();
+    setMinimumSize(parentSize);
+    setMaximumSize(parentSize);
+    raise();
+    show();
 }
 
 void DialogWidget::on_cancelButton_clicked()

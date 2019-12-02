@@ -31,6 +31,8 @@ public:
     void setSex(QString text);
     void setPhone(QString text);
 
+    void popup();
+
 signals:
     void doDialogWidgetClosed();
 
@@ -42,6 +44,7 @@ private slots:
 private:
     Ui::DialogWidget* ui;
     DyalogWidgetModes _currentMode;
+    QWidget* _parentWidget;
 };
 
 #endif  // DIALOGWIDGET_H

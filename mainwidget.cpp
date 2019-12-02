@@ -37,7 +37,7 @@ MainWidget::~MainWidget()
 void MainWidget::on_addButton_clicked()
 {
     _dialogWidget->changeMode(DyalogWidgetModes::AddMode);
-    _dialogWidget->show();
+    _dialogWidget->popup();
 }
 
 void MainWidget::on_deleteButton_clicked()
@@ -55,7 +55,7 @@ void MainWidget::on_editButton_clicked()
         _dialogWidget->setSex(_model->data(_currentModelIndex, SexRole).toString());
         _dialogWidget->setPhone(_model->data(_currentModelIndex, PhoneRole).toString());
         _dialogWidget->changeMode(DyalogWidgetModes::EditMode);
-        _dialogWidget->show();
+        _dialogWidget->popup();
     }
 }
 
