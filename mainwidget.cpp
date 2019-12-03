@@ -49,11 +49,12 @@ void MainWidget::on_deleteButton_clicked()
 void MainWidget::on_editButton_clicked()
 {
     if (_model) {
-        _dialogWidget->setFirstName(_model->data(_currentModelIndex, FirstNameRole).toString());
-        _dialogWidget->setSecondName(_model->data(_currentModelIndex, SecondNameRole).toString());
-        _dialogWidget->setPatronym(_model->data(_currentModelIndex, PatronymRole).toString());
-        _dialogWidget->setSex(_model->data(_currentModelIndex, SexRole).toString());
-        _dialogWidget->setPhone(_model->data(_currentModelIndex, PhoneRole).toString());
+        int row = _currentModelIndex.row();
+        _dialogWidget->setSecondName(_model->data(_model->index(row, 0)).toString());
+        _dialogWidget->setFirstName(_model->data(_model->index(row, 1)).toString());
+        _dialogWidget->setPatronym(_model->data(_model->index(row, 2)).toString());
+        _dialogWidget->setSex(_model->data(_model->index(row, 3)).toString());
+        _dialogWidget->setPhone(_model->data(_model->index(row, 4)).toString());
         _dialogWidget->changeMode(DyalogWidgetModes::EditMode);
         _dialogWidget->popup();
     }
@@ -199,17 +200,6 @@ void MainWidget::modelDataChanged(const QModelIndex& topLeft, const QModelIndex&
     Q_UNUSED(bottomRight)
     Q_UNUSED(roles)
 
-    _contacts.clear();
-    for (int i = 0; i < _model->rowCount(); ++i) {
-        QModelIndex index = _model->index(i, 0);
-        Item item;
-        item.secondName = _model->data(index, SecondNameRole).toString();
-        item.firstName = _model->data(index, FirstNameRole).toString();
-        item.patronym = _model->data(index, PatronymRole).toString();
-        item.sex = _model->data(index, SexRole).toString();
-        item.phone = _model->data(index, PhoneRole).toString();
-        _contacts.push_back(item);
-    }
     updateServerData();
 }
 
@@ -217,12 +207,13 @@ void MainWidget::createModel()
 {
     _model = new PhoneBookModel(this);
     connect(_model, &QAbstractItemModel::dataChanged, this, &MainWidget::modelDataChanged);
+    connect(_model, &PhoneBookModel::doAddNewContact, this, &MainWidget::updateServerData);
 }
 
 void MainWidget::sendMessage(QByteArray& message)
 {
     if (_tcpSocket != nullptr) {
-        quint16 size = static_cast<quint16>(message.size());
+        quint16 size = qToLittleEndian<quint16>(static_cast<quint16>(message.size()));
         _tcpSocket->write(reinterpret_cast<char*>(&size), sizeof(quint16));
         _tcpSocket->write(message);
         _tcpSocket->flush();
@@ -231,6 +222,8 @@ void MainWidget::sendMessage(QByteArray& message)
 
 void MainWidget::updateServerData()
 {
+    qDebug() << "update server data";
+    copyDataFromModel();
     QByteArray message;
     message.append(Headers::ClearContacts);
     sendMessage(message);
@@ -278,4 +271,18 @@ void MainWidget::updateServerData()
 void MainWidget::updatePhoneBookModel()
 {
     _model->updateModelData(_contacts);
+}
+
+void MainWidget::copyDataFromModel()
+{
+    _contacts.clear();
+    for (int i = 0; i < _model->rowCount(); ++i) {
+        Item item;
+        item.secondName = _model->data(_model->index(i, 0)).toString();
+        item.firstName = _model->data(_model->index(i, 1)).toString();
+        item.patronym = _model->data(_model->index(i, 2)).toString();
+        item.sex = _model->data(_model->index(i, 3)).toString();
+        item.phone = _model->data(_model->index(i, 4)).toString();
+        _contacts.push_back(item);
+    }
 }

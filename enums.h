@@ -2,15 +2,6 @@
 #define ENUMS_H
 #include <QString>
 
-enum Roles
-{
-    FirstNameRole = Qt::UserRole + 1,
-    SecondNameRole,
-    PatronymRole,
-    SexRole,
-    PhoneRole
-};
-
 enum DyalogWidgetModes
 {
     EditMode,

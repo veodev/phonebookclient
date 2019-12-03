@@ -24,6 +24,9 @@ public:
     void resetModel();
     void updateModelData(const QList<Item>& data);
 
+signals:
+    void doAddNewContact();
+
 private:
     QList<Item> _data;
 };

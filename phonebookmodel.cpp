@@ -45,49 +45,35 @@ QVariant PhoneBookModel::data(const QModelIndex& index, int role) const
             return _data[currentRow].phone;
         }
     }
-
-
-    switch (role) {
-    case FirstNameRole:
-        return _data[currentRow].firstName;
-    case SecondNameRole:
-        return _data[currentRow].secondName;
-    case PatronymRole:
-        return _data[currentRow].patronym;
-    case SexRole:
-        return _data[currentRow].sex;
-    case PhoneRole:
-        return _data[currentRow].phone;
-    }
-
     return QVariant();
 }
 
 bool PhoneBookModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
+    Q_UNUSED(role)
     int currentRow = index.row();
     if (index.isValid() == false || currentRow >= _data.size()) {
         return false;
     }
 
-    switch (role) {
-    case FirstNameRole:
-        _data[currentRow].firstName = value.toString();
-        break;
-    case SecondNameRole:
+    switch (index.column()) {
+    case 0:
         _data[currentRow].secondName = value.toString();
         break;
-    case PatronymRole:
+    case 1:
+        _data[currentRow].firstName = value.toString();
+        break;
+    case 2:
         _data[currentRow].patronym = value.toString();
         break;
-    case SexRole:
+    case 3:
         _data[currentRow].sex = value.toString();
         break;
-    case PhoneRole:
+    case 4:
         _data[currentRow].phone = value.toString();
         break;
     }
-    emit dataChanged(index, index, QVector<int>() << role);
+    emit dataChanged(index, index);
     return true;
 }
 
@@ -141,8 +127,7 @@ void PhoneBookModel::addContact(const QString& firstName, const QString& secondN
     beginInsertRows(QModelIndex(), row, row);
     _data.append(item);
     endInsertRows();
-
-    emit dataChanged(index(0, 0), index(_data.size() - 1, 0));
+    emit doAddNewContact();
 }
 
 void PhoneBookModel::removeContact(const QModelIndex& index)
@@ -158,11 +143,16 @@ void PhoneBookModel::removeContact(const QModelIndex& index)
 
 void PhoneBookModel::editContact(QModelIndex& index, const QString& firstName, const QString& secondName, const QString& patronym, const QString& sex, const QString& phone)
 {
-    setData(index, firstName, FirstNameRole);
-    setData(index, secondName, SecondNameRole);
-    setData(index, patronym, PatronymRole);
-    setData(index, sex, SexRole);
-    setData(index, phone, PhoneRole);
+    Item item = _data[index.row()];
+    item.secondName = secondName;
+    item.firstName = firstName;
+    item.patronym = patronym;
+    item.sex = sex;
+    item.phone = phone;
+    _data.replace(index.row(), item);
+    QModelIndex topLeft = createIndex(index.row(), 0);
+    QModelIndex bottomRight = createIndex(index.row(), 4);
+    emit dataChanged(topLeft, bottomRight);
 }
 
 void PhoneBookModel::resetModel()
@@ -178,5 +168,4 @@ void PhoneBookModel::updateModelData(const QList<Item>& data)
     for (const auto& item : data) {
         _data.append(item);
     }
-    emit dataChanged(this->index(0, 0), this->index(_data.size() - 1, 0));
 }

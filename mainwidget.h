@@ -40,6 +40,7 @@ private:
     void sendMessage(QByteArray& message);
     void updateServerData();
     void updatePhoneBookModel();
+    void copyDataFromModel();
 
 private:
     Ui::MainWidget* ui;
