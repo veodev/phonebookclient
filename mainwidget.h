@@ -35,7 +35,7 @@ private slots:
 private:
     void connectToServer();
     void disconnectToServer();
-    void readMessageFromBuffer2();
+    void readMessageFromBuffer();
     void createModel();
     void sendMessage(QByteArray& message);
     void updateServerData();
