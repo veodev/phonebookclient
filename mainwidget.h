@@ -35,12 +35,13 @@ private slots:
 private:
     void connectToServer();
     void disconnectToServer();
-    void readMessageFromBuffer();
+    void readMessageFromBuffer2();
     void createModel();
     void sendMessage(QByteArray& message);
     void updateServerData();
     void updatePhoneBookModel();
     void copyDataFromModel();
+    void parseContact(QByteArray& data);
 
 private:
     Ui::MainWidget* ui;

@@ -5,6 +5,7 @@
 #include <QHostAddress>
 #include <QtEndian>
 #include <QTimer>
+#include <QtXml>
 
 MainWidget::MainWidget(QWidget* parent)
     : QWidget(parent)
@@ -119,35 +120,9 @@ void MainWidget::readMessageFromBuffer()
                 case Headers::SaveContacts:
                     updatePhoneBookModel();
                     break;
-                case Headers::StartSingleContact:
-                    _bufferItem.reset();
-                    break;
-                case Headers::EndSingleContact:
-                    _contacts.push_back(_bufferItem);
-                    ++_itemIndex;
-                    break;
-                case Headers::SecondName: {
-                    _bufferItem.secondName = QString::fromUtf8(_messagesBuffer.left(size - sizeof(Headers)));
-                    _messagesBuffer.remove(0, size - sizeof(Headers));
-                    break;
-                }
-                case Headers::FirstName: {
-                    _bufferItem.firstName = QString::fromUtf8(_messagesBuffer.left(size - sizeof(Headers)));
-                    _messagesBuffer.remove(0, size - sizeof(Headers));
-                    break;
-                }
-                case Headers::Patronym: {
-                    _bufferItem.patronym = QString::fromUtf8(_messagesBuffer.left(size - sizeof(Headers)));
-                    _messagesBuffer.remove(0, size - sizeof(Headers));
-                    break;
-                }
-                case Headers::Sex: {
-                    _bufferItem.sex = QString::fromUtf8(_messagesBuffer.left(size - sizeof(Headers)));
-                    _messagesBuffer.remove(0, size - sizeof(Headers));
-                    break;
-                }
-                case Headers::Phone: {
-                    _bufferItem.phone = QString::fromUtf8(_messagesBuffer.left(size - sizeof(Headers)));
+                case Headers::SingleContact: {
+                    QByteArray data = _messagesBuffer.left(size - sizeof(Headers));
+                    parseContact(data);
                     _messagesBuffer.remove(0, size - sizeof(Headers));
                     break;
                 }
@@ -222,44 +197,44 @@ void MainWidget::sendMessage(QByteArray& message)
 
 void MainWidget::updateServerData()
 {
-    qDebug() << "update server data";
     copyDataFromModel();
+
     QByteArray message;
     message.append(Headers::ClearContacts);
     sendMessage(message);
 
-    for (auto& contact : _contacts) {
-        QByteArray message;
-        message.append(Headers::StartSingleContact);
-        sendMessage(message);
+    for (int i = 0; i < _contacts.size(); ++i) {
+        QByteArray data;
+        QXmlStreamWriter xmlWriter(&data);
+        xmlWriter.writeStartElement("item");
+        xmlWriter.writeAttribute("id", QString("%1").arg(i));
+
+        xmlWriter.writeStartElement("secondname");
+        xmlWriter.writeCharacters(_contacts[i].secondName);
+        xmlWriter.writeEndElement();
+
+        xmlWriter.writeStartElement("firstname");
+        xmlWriter.writeCharacters(_contacts[i].firstName);
+        xmlWriter.writeEndElement();
+
+
+        xmlWriter.writeStartElement("patronym");
+        xmlWriter.writeCharacters(_contacts[i].patronym);
+        xmlWriter.writeEndElement();
+
+        xmlWriter.writeStartElement("sex");
+        xmlWriter.writeCharacters(_contacts[i].sex);
+        xmlWriter.writeEndElement();
+
+        xmlWriter.writeStartElement("phone");
+        xmlWriter.writeCharacters(_contacts[i].phone);
+        xmlWriter.writeEndElement();
+
+        xmlWriter.writeEndElement();
 
         message.clear();
-        message.append(Headers::SecondName);
-        message.append(contact.secondName.toUtf8());
-        sendMessage(message);
-
-        message.clear();
-        message.append(Headers::FirstName);
-        message.append(contact.firstName.toUtf8());
-        sendMessage(message);
-
-        message.clear();
-        message.append(Headers::Patronym);
-        message.append(contact.patronym.toUtf8());
-        sendMessage(message);
-
-        message.clear();
-        message.append(Headers::Sex);
-        message.append(contact.sex.toUtf8());
-        sendMessage(message);
-
-        message.clear();
-        message.append(Headers::Phone);
-        message.append(contact.phone.toUtf8());
-        sendMessage(message);
-
-        message.clear();
-        message.append(Headers::EndSingleContact);
+        message.append(Headers::SingleContact);
+        message.append(data);
         sendMessage(message);
     }
 
@@ -284,5 +259,42 @@ void MainWidget::copyDataFromModel()
         item.sex = _model->data(_model->index(i, 3)).toString();
         item.phone = _model->data(_model->index(i, 4)).toString();
         _contacts.push_back(item);
+    }
+}
+
+void MainWidget::parseContact(QByteArray& data)
+{
+    QXmlStreamReader xmlReader(data);
+    bool isContactFilled = false;
+    while (!xmlReader.atEnd()) {
+        if (xmlReader.isStartElement()) {
+            if (xmlReader.name() == "item") {
+                _itemIndex = xmlReader.attributes().at(0).value().toInt();
+                _bufferItem.reset();
+                isContactFilled = false;
+            }
+            if (xmlReader.isStartElement() && xmlReader.name() == "secondname") {
+                _bufferItem.secondName = xmlReader.readElementText();
+            }
+            if (xmlReader.isStartElement() && xmlReader.name() == "firstname") {
+                _bufferItem.firstName = xmlReader.readElementText();
+            }
+            if (xmlReader.isStartElement() && xmlReader.name() == "patronym") {
+                _bufferItem.patronym = xmlReader.readElementText();
+            }
+            if (xmlReader.isStartElement() && xmlReader.name() == "sex") {
+                _bufferItem.sex = xmlReader.readElementText();
+            }
+            if (xmlReader.isStartElement() && xmlReader.name() == "phone") {
+                _bufferItem.phone = xmlReader.readElementText();
+                isContactFilled = true;
+            }
+        }
+
+        if (isContactFilled) {
+            _contacts.push_back(_bufferItem);
+            isContactFilled = false;
+        }
+        xmlReader.readNext();
     }
 }
